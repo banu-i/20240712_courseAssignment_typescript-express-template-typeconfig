@@ -1,0 +1,50 @@
+name: MySQL Integration Workflow + EsLint und Prettier
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:latest
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: root_password
+          MYSQL_DATABASE: test_db
+          MYSQL_USER: test_user
+          MYSQL_PASSWORD: test_password
+        options: >-
+          --health-cmd "mysqladmin ping --silent"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Wait for MySQL to be ready
+      run: |
+        dockerize -wait tcp://localhost:3306 -timeout 1m
+    - name: Run database migrations
+      run: |
+        mysql -h 127.0.0.1 -u test_user -ptest_password test_db < path/to/migrations.sql
+    - name: Run lint
+      run: npm run lint
+    - name: Run prettier
+      run: npm run prettier
+    - name: Run tests
+      run: |
+        # Führen Sie hier Ihre Tests aus
+        echo "Running tests..."
+    - name: Teardown
+      run: |
+        mysqladmin -h 127.0.0.1 -u root -proot_password shutdown
