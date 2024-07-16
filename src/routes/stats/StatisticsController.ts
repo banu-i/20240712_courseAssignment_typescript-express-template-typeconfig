@@ -10,7 +10,7 @@ export interface ISetDeviceInfoBody {
 }
 export type ISetDeviceInfoResponse = boolean;
 
-@Route('v1/statss')
+@Route('v1/stats')
 @Tags('Statistics')
 class StatsController extends Controller {
     @Post('/deviceinfo')
